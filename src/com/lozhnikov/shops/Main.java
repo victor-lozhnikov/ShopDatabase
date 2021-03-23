@@ -1,19 +1,15 @@
 package com.lozhnikov.shops;
 
-import com.lozhnikov.shops.sql.SQLExecutor;
+import com.lozhnikov.shops.view.LoginPanel;
 
-import java.sql.*;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.TimeZone;
+import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
-        try {
-            SQLExecutor executor = new SQLExecutor();
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        JFrame mainFrame = new JFrame("Shop Database App");
+        mainFrame.setBounds(100, 100, 640, 480);
+        mainFrame.setResizable(false);
+        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        LoginPanel loginPanel = new LoginPanel(mainFrame);
     }
 }
