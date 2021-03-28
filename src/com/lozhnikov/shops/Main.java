@@ -10,6 +10,9 @@ public class Main {
         mainFrame.setBounds(100, 100, 640, 480);
         mainFrame.setResizable(false);
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
         LoginPanel loginPanel = new LoginPanel(mainFrame);
+        loginPanel.start();
+        mainFrame.setVisible(true);
     }
 }

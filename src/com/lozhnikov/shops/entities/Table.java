@@ -12,4 +12,16 @@ public class Table {
     private final String name;
     private final String translate;
     private final List<Field> fields;
+
+    public String getName() {
+        return name;
+    }
+
+    public String getTranslate() {
+        return translate;
+    }
+
+    public List<Field> getFields() {
+        return fields;
+    }
 }
