@@ -4,12 +4,12 @@ import com.lozhnikov.shops.sql.SQLExecutor;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.util.concurrent.Callable;
 
 public class MenuPanel extends JPanel {
     private final JFrame mainFrame;
     private final SQLExecutor sqlExecutor;
+    private JLabel infoLabel;
 
     public MenuPanel(JFrame mainFrame, SQLExecutor sqlExecutor) {
         this.mainFrame = mainFrame;
@@ -17,6 +17,7 @@ public class MenuPanel extends JPanel {
     }
 
     private void init() {
+        removeAll();
         setLayout(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -32,31 +33,39 @@ public class MenuPanel extends JPanel {
         add(dropButton, gbc);
 
         gbc.gridy++;
-        add(new JButton("Заполнить таблицы"), gbc);
+        JButton insertButton = new JButton("Заполнить таблицы");
+        add(insertButton, gbc);
 
         gbc.gridy++;
-        add(new JButton("Просмотреть таблицы"), gbc);
+        JButton viewButton = new JButton("Просмотреть таблицы");
+        add(viewButton, gbc);
 
         gbc.gridy++;
-        JLabel infoLabel = new JLabel("\n");
+        infoLabel = new JLabel("\n");
         add(infoLabel, gbc);
 
         createButton.addActionListener(e -> {
-            infoLabel.setForeground(Color.BLACK);
-            infoLabel.setText("Запрос выполняется...");
-            mainFrame.revalidate();
-            String error = sqlExecutor.createTables();
-            infoLabel.setForeground(Color.RED);
-            infoLabel.setText(error);
+            if (buttonFunction(sqlExecutor::createTables)) {
+                infoLabel.setForeground(Color.BLACK);
+                infoLabel.setText("Таблицы созданы");
+            }
         });
 
         dropButton.addActionListener(e -> {
-            infoLabel.setForeground(Color.BLACK);
-            infoLabel.setText("Запрос выполняется...");
-            mainFrame.revalidate();
-            String error = sqlExecutor.dropTables();
-            infoLabel.setForeground(Color.RED);
-            infoLabel.setText(error);
+            if (buttonFunction(sqlExecutor::dropTables)) {
+                infoLabel.setForeground(Color.BLACK);
+                infoLabel.setText("Таблицы удалены");
+            }
+        });
+        insertButton.addActionListener(e -> {
+            if (buttonFunction(sqlExecutor::insertValues)) {
+                infoLabel.setForeground(Color.BLACK);
+                infoLabel.setText("Таблицы заполнены");
+            }
+        });
+        viewButton.addActionListener(e -> {
+            ChooseTablePanel chooseTablePanel = new ChooseTablePanel(mainFrame, this, sqlExecutor);
+            chooseTablePanel.start();
         });
     }
 
@@ -65,5 +74,25 @@ public class MenuPanel extends JPanel {
         mainFrame.getContentPane().removeAll();
         mainFrame.getContentPane().add(this);
         update(getGraphics());
+        mainFrame.revalidate();
+    }
+
+    private boolean buttonFunction(Callable<String> function) {
+        infoLabel.setForeground(Color.BLACK);
+        infoLabel.setText("Запрос выполняется...");
+        mainFrame.revalidate();
+        String error = "\n";
+        try {
+            error = function.call();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        if (error.isEmpty()) {
+            return true;
+        }
+        infoLabel.setForeground(Color.RED);
+        infoLabel.setText(error);
+        return false;
     }
 }

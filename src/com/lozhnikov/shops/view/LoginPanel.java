@@ -27,9 +27,9 @@ public class LoginPanel extends JPanel {
 
         fields.add(new JLabel("URL"), gbc);
         gbc.gridy++;
-        fields.add(new JLabel("Login"), gbc);
+        fields.add(new JLabel("Логин"), gbc);
         gbc.gridy++;
-        fields.add(new JLabel("Password"), gbc);
+        fields.add(new JLabel("Пароль"), gbc);
 
         gbc.gridy = 0;
         gbc.gridx++;

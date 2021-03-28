@@ -2,7 +2,9 @@ package com.lozhnikov.shops.sql;
 
 import com.lozhnikov.shops.SecretProperties;
 import com.lozhnikov.shops.entities.Field;
+import com.lozhnikov.shops.entities.Row;
 import com.lozhnikov.shops.entities.Table;
+import com.lozhnikov.shops.entities.Value;
 
 import java.sql.*;
 import java.util.Locale;
@@ -11,7 +13,6 @@ import java.util.TimeZone;
 
 public class SQLExecutor {
     private final Connection connection;
-    private boolean connected = false;
 
     public SQLExecutor(String url, String login, String password) throws ClassNotFoundException, SQLException {
         Class.forName("oracle.jdbc.driver.OracleDriver");
@@ -25,17 +26,12 @@ public class SQLExecutor {
         Locale.setDefault(Locale.ENGLISH);
 
         connection = DriverManager.getConnection(url, props);
-        connected = true;
         System.out.println("SQL connected!");
     }
 
     public ResultSet runSQLRequest(String request) throws SQLException {
         PreparedStatement preStatement = connection.prepareStatement(request);
         return preStatement.executeQuery();
-    }
-
-    public boolean isConnected() {
-        return connected;
     }
 
     public String createTables() {
@@ -70,7 +66,7 @@ public class SQLExecutor {
                 return ex.getMessage();
             }
         }
-        return "\n";
+        return "";
     }
 
     public String dropTables() {
@@ -84,6 +80,50 @@ public class SQLExecutor {
                 return ex.getMessage();
             }
         }
-        return "\n";
+        return "";
+    }
+
+    public String insertValues() {
+        for (Table table : Model.tables) {
+            for (Row row : table.getRows()) {
+                StringBuilder request = new StringBuilder("insert into " + table.getName() + "\n");
+                request.append("(");
+                boolean isFirst = true;
+                for (Value value : row.getValues()) {
+                    if (!isFirst) {
+                        request.append(", ");
+                    }
+                    else {
+                        isFirst = false;
+                    }
+                    request.append(value.getField());
+                }
+                request.append(")\nvalues\n(");
+                isFirst = true;
+                for (Value value : row.getValues()) {
+                    if (!isFirst) {
+                        request.append(", ");
+                    }
+                    else {
+                        isFirst = false;
+                    }
+                    request.append(value.getValue());
+                }
+                request.append(")");
+                System.out.println(request.toString());
+
+                try {
+                    runSQLRequest(request.toString());
+                }
+                catch (SQLException ex) {
+                    return ex.getMessage();
+                }
+            }
+        }
+        return "";
+    }
+
+    public ResultSet getAllTableValues(Table table) throws SQLException {
+        return runSQLRequest("select * from " + table.getName());
     }
 }
