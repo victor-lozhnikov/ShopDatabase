@@ -29,23 +29,23 @@ public class Model {
                         {
                             add(new Row(new ArrayList<Value>() {
                                 {
-                                    add(new Value("id", "1"));
+                                    add(new Value("id", 1));
                                     add(new Value("name", "'ТЦ'"));
-                                    add(new Value("type_id", "2"));
+                                    add(new Value("type_id", 2));
                                 }
                             }));
                             add(new Row(new ArrayList<Value>() {
                                 {
-                                    add(new Value("id", "2"));
+                                    add(new Value("id", 2));
                                     add(new Value("name", "'Быстроном'"));
-                                    add(new Value("type_id", "1"));
+                                    add(new Value("type_id", 1));
                                 }
                             }));
                             add(new Row(new ArrayList<Value>() {
                                 {
-                                    add(new Value("id", "3"));
+                                    add(new Value("id", 3));
                                     add(new Value("name", "'Дядя Денер'"));
-                                    add(new Value("type_id", "3"));
+                                    add(new Value("type_id", 3));
                                 }
                             }));
                         }
@@ -81,25 +81,25 @@ public class Model {
                         {
                             add(new Row(new ArrayList<Value>() {
                                 {
-                                    add(new Value("id", "1"));
+                                    add(new Value("id", 1));
                                     add(new Value("name", "'Универмаг'"));
                                 }
                             }));
                             add(new Row(new ArrayList<Value>() {
                                 {
-                                    add(new Value("id", "2"));
+                                    add(new Value("id", 2));
                                     add(new Value("name", "'Магазин'"));
                                 }
                             }));
                             add(new Row(new ArrayList<Value>() {
                                 {
-                                    add(new Value("id", "3"));
+                                    add(new Value("id", 3));
                                     add(new Value("name", "'Киоск'"));
                                 }
                             }));
                             add(new Row(new ArrayList<Value>() {
                                 {
-                                    add(new Value("id", "4"));
+                                    add(new Value("id", 4));
                                     add(new Value("name", "'Лоток'"));
                                 }
                             }));
@@ -119,13 +119,13 @@ public class Model {
                         {
                             add(new Row(new ArrayList<Value>() {
                                 {
-                                    add(new Value("id", "1"));
+                                    add(new Value("id", 1));
                                     add(new Value("name", "'Продавец'"));
                                 }
                             }));
                             add(new Row(new ArrayList<Value>() {
                                 {
-                                    add(new Value("id", "2"));
+                                    add(new Value("id", 2));
                                     add(new Value("name", "'Менеджер'"));
                                 }
                             }));

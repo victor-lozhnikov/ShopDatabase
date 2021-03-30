@@ -81,9 +81,11 @@ public class LoginPanel extends JPanel {
     }
 
     public void start() {
+        removeAll();
         init();
         mainFrame.getContentPane().removeAll();
         mainFrame.getContentPane().add(this);
         update(getGraphics());
+        mainFrame.revalidate();
     }
 }

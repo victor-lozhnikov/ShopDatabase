@@ -1,15 +1,11 @@
 package com.lozhnikov.shops.view;
 
-import com.lozhnikov.shops.sql.SQLExecutor;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Vector;
 
 public class ViewTablePanel extends JPanel {
@@ -45,7 +41,6 @@ public class ViewTablePanel extends JPanel {
     }
 
     private void init() {
-        removeAll();
         setLayout(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -73,6 +68,7 @@ public class ViewTablePanel extends JPanel {
     }
 
     public void start() {
+        removeAll();
         init();
         mainFrame.getContentPane().removeAll();
         mainFrame.getContentPane().add(this);

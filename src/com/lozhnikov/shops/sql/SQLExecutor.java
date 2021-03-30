@@ -31,6 +31,7 @@ public class SQLExecutor {
 
     public ResultSet runSQLRequest(String request) throws SQLException {
         PreparedStatement preStatement = connection.prepareStatement(request);
+
         return preStatement.executeQuery();
     }
 
@@ -83,42 +84,48 @@ public class SQLExecutor {
         return "";
     }
 
-    public String insertValues() {
-        for (Table table : Model.tables) {
-            for (Row row : table.getRows()) {
-                StringBuilder request = new StringBuilder("insert into " + table.getName() + "\n");
-                request.append("(");
-                boolean isFirst = true;
-                for (Value value : row.getValues()) {
-                    if (!isFirst) {
-                        request.append(", ");
-                    }
-                    else {
-                        isFirst = false;
-                    }
-                    request.append(value.getField());
-                }
-                request.append(")\nvalues\n(");
-                isFirst = true;
-                for (Value value : row.getValues()) {
-                    if (!isFirst) {
-                        request.append(", ");
-                    }
-                    else {
-                        isFirst = false;
-                    }
-                    request.append(value.getValue());
-                }
-                request.append(")");
-                System.out.println(request.toString());
-
-                try {
-                    runSQLRequest(request.toString());
-                }
-                catch (SQLException ex) {
-                    return ex.getMessage();
-                }
+    public String insertValues(Table table) {
+        for (Row row : table.getRows()) {
+            String error = insertValue(table, row);
+            if (!error.isEmpty()) {
+                return error;
             }
+        }
+        return "";
+    }
+
+    public String insertValue(Table table, Row row) {
+        StringBuilder request = new StringBuilder("insert into " + table.getName() + "\n");
+        request.append("(");
+        boolean isFirst = true;
+        for (Value value : row.getValues()) {
+            if (!isFirst) {
+                request.append(", ");
+            }
+            else {
+                isFirst = false;
+            }
+            request.append(value.getField());
+        }
+        request.append(")\nvalues\n(");
+        isFirst = true;
+        for (Value value : row.getValues()) {
+            if (!isFirst) {
+                request.append(", ");
+            }
+            else {
+                isFirst = false;
+            }
+            request.append(value.getValue());
+        }
+        request.append(")");
+        System.out.println(request.toString());
+
+        try {
+            runSQLRequest(request.toString());
+        }
+        catch (SQLException ex) {
+            return ex.getMessage();
         }
         return "";
     }

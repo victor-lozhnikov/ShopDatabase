@@ -17,7 +17,6 @@ public class MenuPanel extends JPanel {
     }
 
     private void init() {
-        removeAll();
         setLayout(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -58,18 +57,19 @@ public class MenuPanel extends JPanel {
             }
         });
         insertButton.addActionListener(e -> {
-            if (buttonFunction(sqlExecutor::insertValues)) {
-                infoLabel.setForeground(Color.BLACK);
-                infoLabel.setText("Таблицы заполнены");
-            }
+            ChooseTablePanel chooseTablePanel = new ChooseTablePanel(mainFrame, this,
+                    sqlExecutor, ChooseGoalType.FILL);
+            chooseTablePanel.start();
         });
         viewButton.addActionListener(e -> {
-            ChooseTablePanel chooseTablePanel = new ChooseTablePanel(mainFrame, this, sqlExecutor);
+            ChooseTablePanel chooseTablePanel = new ChooseTablePanel(mainFrame, this,
+                    sqlExecutor, ChooseGoalType.VIEW);
             chooseTablePanel.start();
         });
     }
 
     public void start() {
+        removeAll();
         init();
         mainFrame.getContentPane().removeAll();
         mainFrame.getContentPane().add(this);

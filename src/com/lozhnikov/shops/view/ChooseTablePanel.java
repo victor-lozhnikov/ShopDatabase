@@ -13,15 +13,17 @@ public class ChooseTablePanel extends JPanel {
     private final JFrame mainFrame;
     private final MenuPanel menuPanel;
     private final SQLExecutor sqlExecutor;
+    private final ChooseGoalType chooseGoalType;
 
-    public ChooseTablePanel(JFrame mainFrame, MenuPanel menuPanel, SQLExecutor sqlExecutor) {
+    public ChooseTablePanel(JFrame mainFrame, MenuPanel menuPanel, SQLExecutor sqlExecutor,
+                            ChooseGoalType chooseGoalType) {
         this.mainFrame = mainFrame;
         this.menuPanel = menuPanel;
         this.sqlExecutor = sqlExecutor;
+        this.chooseGoalType = chooseGoalType;
     }
 
     private void init() {
-        removeAll();
         setLayout(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -40,20 +42,28 @@ public class ChooseTablePanel extends JPanel {
             tables.add(tableButton, gbc);
 
             tableButton.addActionListener(e -> {
-                try {
-                    infoLabel.setForeground(Color.BLACK);
-                    infoLabel.setText("Запрос выполняется...");
-                    mainFrame.revalidate();
-                    update(getGraphics());
-                    ResultSet resultSet = sqlExecutor.getAllTableValues(table);
-                    ViewTablePanel viewTablePanel = new ViewTablePanel(mainFrame, this, resultSet);
-                    viewTablePanel.start();
-                }
-                catch (SQLException ex) {
-                    infoLabel.setForeground(Color.RED);
-                    infoLabel.setText(ex.getMessage());
-                    //mainFrame.revalidate();
-                    //update(getGraphics());
+                switch (chooseGoalType) {
+                    case FILL:
+                        AddRowPanel addRowPanel = new AddRowPanel(mainFrame, this,
+                                sqlExecutor, table);
+                        addRowPanel.start();
+                        break;
+                    case VIEW:
+                        try {
+                            infoLabel.setForeground(Color.BLACK);
+                            infoLabel.setText("Запрос выполняется...");
+                            mainFrame.revalidate();
+                            update(getGraphics());
+                            ResultSet resultSet = sqlExecutor.getAllTableValues(table);
+                            ViewTablePanel viewTablePanel = new ViewTablePanel(mainFrame,
+                                    this, resultSet);
+                            viewTablePanel.start();
+                        }
+                        catch (SQLException ex) {
+                            infoLabel.setForeground(Color.RED);
+                            infoLabel.setText(ex.getMessage());
+                        }
+                        break;
                 }
             });
 
@@ -81,6 +91,7 @@ public class ChooseTablePanel extends JPanel {
     }
 
     public void start() {
+        removeAll();
         init();
         mainFrame.getContentPane().removeAll();
         mainFrame.getContentPane().add(this);

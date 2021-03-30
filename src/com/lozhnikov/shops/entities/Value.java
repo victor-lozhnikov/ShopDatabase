@@ -2,9 +2,9 @@ package com.lozhnikov.shops.entities;
 
 public class Value {
     private final String field;
-    private final String value;
+    private final Object value;
 
-    public Value(String field, String value) {
+    public Value(String field, Object value) {
         this.field = field;
         this.value = value;
     }
@@ -13,7 +13,7 @@ public class Value {
         return field;
     }
 
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 }
