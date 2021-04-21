@@ -1,5 +1,7 @@
 package com.lozhnikov.shops.view;
 
+import com.lozhnikov.shops.entities.Table;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -11,11 +13,13 @@ import java.util.Vector;
 public class ViewTablePanel extends JPanel {
     private final JFrame mainFrame;
     private final ChooseTablePanel chooseTablePanel;
+    private final Table table;
     private final ResultSet resultSet;
 
-    public ViewTablePanel(JFrame mainFrame, ChooseTablePanel chooseTablePanel, ResultSet resultSet) {
+    public ViewTablePanel(JFrame mainFrame, ChooseTablePanel chooseTablePanel, Table table, ResultSet resultSet) {
         this.mainFrame = mainFrame;
         this.chooseTablePanel = chooseTablePanel;
+        this.table = table;
         this.resultSet = resultSet;
     }
 
@@ -24,8 +28,8 @@ public class ViewTablePanel extends JPanel {
 
         Vector<String> columnNames = new Vector<>();
         int columnCount = metaData.getColumnCount();
-        for (int i = 1; i <= columnCount; ++i) {
-            columnNames.add(metaData.getColumnName(i));
+        for (int i = 0; i < columnCount; ++i) {
+            columnNames.add(table.getFields().get(i).getTranslate());
         }
 
         Vector<Vector<Object>> data = new Vector<>();
@@ -48,9 +52,12 @@ public class ViewTablePanel extends JPanel {
         gbc.gridy = 0;
         gbc.insets = new Insets(8, 8, 8, 8);
 
+        add(new JLabel(table.getTranslate()), gbc);
+        gbc.gridy++;
+
         try {
             JTable table = new JTable(buildTableModel());
-            table.setPreferredScrollableViewportSize(table.getPreferredSize());
+            //table.setPreferredScrollableViewportSize(table.getPreferredSize());
             table.setEnabled(false);
             JScrollPane scrollPane = new JScrollPane(table);
             add(scrollPane, gbc);

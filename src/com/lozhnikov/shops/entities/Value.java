@@ -1,15 +1,15 @@
 package com.lozhnikov.shops.entities;
 
 public class Value {
-    private final String field;
+    private final Field field;
     private final Object value;
 
-    public Value(String field, Object value) {
+    public Value(Field field, Object value) {
         this.field = field;
         this.value = value;
     }
 
-    public String getField() {
+    public Field getField() {
         return field;
     }
 

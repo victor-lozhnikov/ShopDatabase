@@ -1,15 +1,20 @@
 package com.lozhnikov.shops.sql;
 
-import com.lozhnikov.shops.SecretProperties;
-import com.lozhnikov.shops.entities.Field;
 import com.lozhnikov.shops.entities.Row;
 import com.lozhnikov.shops.entities.Table;
 import com.lozhnikov.shops.entities.Value;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SQLExecutor {
     private final Connection connection;
@@ -31,67 +36,43 @@ public class SQLExecutor {
 
     public ResultSet runSQLRequest(String request) throws SQLException {
         PreparedStatement preStatement = connection.prepareStatement(request);
-
         return preStatement.executeQuery();
     }
 
-    public String createTables() {
-        for (Table table : Model.tables) {
-            StringBuilder request = new StringBuilder("create table " + table.getName() + " (\n");
-            for (Field field : table.getFields()) {
-                request.append(field.getName()).append(" ").append(field.getType());
-                if (field.isNotNull()) {
-                    request.append(" not null");
-                }
-                request.append(",\n");
+    private String runSQLScript(String fileName) {
+        String fileContent = new BufferedReader(
+                new InputStreamReader(getClass().getResourceAsStream(fileName)))
+                .lines().collect(Collectors.joining());
+        String[] requests = fileContent.split(";");
+        try {
+            connection.setAutoCommit(false);
+            for (String request : requests) {
+                runSQLRequest(request);
             }
-            request.append("primary key (");
-            boolean isFirst = true;
-            for (Field field : table.getFields()) {
-                if (field.isPrimary()) {
-                    if (!isFirst) {
-                        request.append(", ");
-                    }
-                    else {
-                        isFirst = false;
-                    }
-                    request.append(field.getName());
-                }
-            }
-            request.append("))");
-            System.out.println(request.toString());
+            connection.commit();
+        }
+        catch (SQLException ex) {
             try {
-                runSQLRequest(request.toString());
+                connection.rollback();
             }
-            catch (SQLException ex) {
-                return ex.getMessage();
+            catch (SQLException ex1) {
+                ex.printStackTrace();
             }
+            return ex.getMessage();
         }
         return "";
+    }
+
+    public String createTables() {
+        return runSQLScript("/scripts/create.sql");
     }
 
     public String dropTables() {
-        for (Table table : Model.tables) {
-            StringBuilder request = new StringBuilder("drop table " + table.getName());
-            System.out.println(request.toString());
-            try {
-                runSQLRequest(request.toString());
-            }
-            catch (SQLException ex) {
-                return ex.getMessage();
-            }
-        }
-        return "";
+        return runSQLScript("/scripts/drop.sql");
     }
 
-    public String insertValues(Table table) {
-        for (Row row : table.getRows()) {
-            String error = insertValue(table, row);
-            if (!error.isEmpty()) {
-                return error;
-            }
-        }
-        return "";
+    public String insertValues() {
+        return runSQLScript("/scripts/insert.sql");
     }
 
     public String insertValue(Table table, Row row) {
@@ -105,7 +86,7 @@ public class SQLExecutor {
             else {
                 isFirst = false;
             }
-            request.append(value.getField());
+            request.append(value.getField().getName());
         }
         request.append(")\nvalues\n(");
         isFirst = true;
@@ -131,6 +112,7 @@ public class SQLExecutor {
     }
 
     public ResultSet getAllTableValues(Table table) throws SQLException {
-        return runSQLRequest("select * from " + table.getName());
+        System.out.println(table.getName());
+        return runSQLRequest("select * from \"" + table.getName() + "\"");
     }
 }

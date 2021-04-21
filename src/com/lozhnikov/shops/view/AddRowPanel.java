@@ -8,8 +8,6 @@ import com.lozhnikov.shops.sql.SQLExecutor;
 
 import javax.swing.*;
 import java.awt.*;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class AddRowPanel extends JPanel {
@@ -34,6 +32,9 @@ public class AddRowPanel extends JPanel {
         gbc.gridy = 0;
         gbc.insets = new Insets(8, 8, 8, 8);
 
+        add(new JLabel(table.getTranslate()), gbc);
+        gbc.gridy++;
+
         java.util.List<JTextField> textFields = new ArrayList<>();
 
         for (Field field : table.getFields()) {
@@ -47,7 +48,7 @@ public class AddRowPanel extends JPanel {
         }
 
         gbc.gridx = 0;
-        gbc.gridy = 0;
+        gbc.gridy = 1;
         add(fieldsPanel, gbc);
         JLabel infoLabel = new JLabel("\n");
 
@@ -66,28 +67,10 @@ public class AddRowPanel extends JPanel {
                 if (fieldText.isEmpty()) {
                     continue;
                 }
-                row.add(new Value(field.getName(), fieldText));
+                row.add(new Value(field, fieldText));
                 i++;
             }
             String error = sqlExecutor.insertValue(table, row);
-            if (error.isEmpty()) {
-                infoLabel.setText("Данные добавлены");
-            }
-            else {
-                infoLabel.setForeground(Color.RED);
-                infoLabel.setText(error);
-            }
-        });
-
-        gbc.gridy++;
-        JButton addAllButton = new JButton("Добавить данные по умолчанию");
-        add(addAllButton, gbc);
-        addAllButton.addActionListener(e -> {
-            infoLabel.setForeground(Color.BLACK);
-            infoLabel.setText("Запрос выполняется...");
-            mainFrame.revalidate();
-            update(getGraphics());
-            String error = sqlExecutor.insertValues(table);
             if (error.isEmpty()) {
                 infoLabel.setText("Данные добавлены");
             }

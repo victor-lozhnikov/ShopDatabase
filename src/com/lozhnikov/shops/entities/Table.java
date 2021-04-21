@@ -6,13 +6,11 @@ public class Table {
     private final String name;
     private final String translate;
     private final List<Field> fields;
-    private final List<Row> rows;
 
-    public Table(String name, String translate, List<Field> fields, List<Row> rows) {
+    public Table(String name, String translate, List<Field> fields) {
         this.name = name;
         this.translate = translate;
         this.fields = fields;
-        this.rows = rows;
     }
 
     public String getName() {
@@ -25,9 +23,5 @@ public class Table {
 
     public List<Field> getFields() {
         return fields;
-    }
-
-    public List<Row> getRows() {
-        return rows;
     }
 }

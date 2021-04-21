@@ -56,7 +56,7 @@ public class ChooseTablePanel extends JPanel {
                             update(getGraphics());
                             ResultSet resultSet = sqlExecutor.getAllTableValues(table);
                             ViewTablePanel viewTablePanel = new ViewTablePanel(mainFrame,
-                                    this, resultSet);
+                                    this, table, resultSet);
                             viewTablePanel.start();
                         }
                         catch (SQLException ex) {
@@ -78,6 +78,26 @@ public class ChooseTablePanel extends JPanel {
         gbc.gridy = 1;
 
         add(tables, gbc);
+
+        if (chooseGoalType == ChooseGoalType.FILL) {
+            gbc.gridy++;
+            JButton addAllButton = new JButton("Добавить данные по умолчанию");
+            add(addAllButton, gbc);
+            addAllButton.addActionListener(e -> {
+                infoLabel.setForeground(Color.BLACK);
+                infoLabel.setText("Запрос выполняется...");
+                mainFrame.revalidate();
+                update(getGraphics());
+                String error = sqlExecutor.insertValues();
+                if (error.isEmpty()) {
+                    infoLabel.setText("Данные добавлены");
+                }
+                else {
+                    infoLabel.setForeground(Color.RED);
+                    infoLabel.setText(error);
+                }
+            });
+        }
 
         gbc.gridy++;
         add(infoLabel, gbc);
