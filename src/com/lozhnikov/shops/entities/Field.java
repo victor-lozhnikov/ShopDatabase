@@ -3,12 +3,14 @@ package com.lozhnikov.shops.entities;
 public class Field {
     private final String name;
     private final String translate;
-    private final boolean notNull;
+    private final boolean isNotNull;
+    private final boolean isString;
 
-    public Field(String name, String translate, boolean notNull) {
+    public Field(String name, String translate, boolean isNotNull, boolean isString) {
         this.name = name;
         this.translate = translate;
-        this.notNull = notNull;
+        this.isNotNull = isNotNull;
+        this.isString = isString;
     }
 
     public String getName() {
@@ -20,6 +22,10 @@ public class Field {
     }
 
     public boolean isNotNull() {
-        return notNull;
+        return isNotNull;
+    }
+
+    public boolean isString() {
+        return isString;
     }
 }

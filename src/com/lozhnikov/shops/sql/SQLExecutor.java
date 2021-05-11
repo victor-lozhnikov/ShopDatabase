@@ -1,5 +1,7 @@
 package com.lozhnikov.shops.sql;
 
+import com.lozhnikov.shops.SecretProperties;
+import com.lozhnikov.shops.entities.Field;
 import com.lozhnikov.shops.entities.Row;
 import com.lozhnikov.shops.entities.Table;
 import com.lozhnikov.shops.entities.Value;
@@ -25,6 +27,7 @@ public class SQLExecutor {
         Properties props = new Properties();
         props.setProperty("user", login);
         props.setProperty("password", password);
+        props.setProperty("characterEncoding", "utf8");
 
         TimeZone timeZone = TimeZone.getTimeZone("GMT+7");
         TimeZone.setDefault(timeZone);
@@ -40,27 +43,21 @@ public class SQLExecutor {
     }
 
     private String runSQLScript(String fileName) {
+        String toReturn = "";
         String fileContent = new BufferedReader(
                 new InputStreamReader(getClass().getResourceAsStream(fileName)))
                 .lines().collect(Collectors.joining());
         String[] requests = fileContent.split(";");
-        try {
-            connection.setAutoCommit(false);
-            for (String request : requests) {
+        for (String request : requests) {
+            try {
                 runSQLRequest(request);
             }
-            connection.commit();
-        }
-        catch (SQLException ex) {
-            try {
-                connection.rollback();
+            catch (SQLException ex) {
+                toReturn = returnError(ex.getMessage());
             }
-            catch (SQLException ex1) {
-                ex.printStackTrace();
-            }
-            return ex.getMessage();
         }
-        return "";
+
+        return toReturn;
     }
 
     public String createTables() {
@@ -76,7 +73,7 @@ public class SQLExecutor {
     }
 
     public String insertValue(Table table, Row row) {
-        StringBuilder request = new StringBuilder("insert into " + table.getName() + "\n");
+        StringBuilder request = new StringBuilder("insert into \"" + table.getName() + "\"\n");
         request.append("(");
         boolean isFirst = true;
         for (Value value : row.getValues()) {
@@ -86,7 +83,7 @@ public class SQLExecutor {
             else {
                 isFirst = false;
             }
-            request.append(value.getField().getName());
+            request.append("\"").append(value.getField().getName()).append("\"");
         }
         request.append(")\nvalues\n(");
         isFirst = true;
@@ -97,22 +94,87 @@ public class SQLExecutor {
             else {
                 isFirst = false;
             }
+            if (value.getField().isString()) {
+                request.append("'");
+            }
             request.append(value.getValue());
+            if (value.getField().isString()) {
+                request.append("'");
+            }
         }
         request.append(")");
-        System.out.println(request.toString());
 
         try {
             runSQLRequest(request.toString());
         }
         catch (SQLException ex) {
-            return ex.getMessage();
+            return returnError(ex.getMessage());
         }
         return "";
     }
 
+    public void updateValue(Table table, Value newValue, Row oldRow) throws SQLException {
+        StringBuilder request = new StringBuilder("update \"" + table.getName() + "\"\nset ");
+        request.append("\"").append(newValue.getField().getName()).append("\" = ");
+        if (newValue.getField().isString()) {
+            request.append("'");
+        }
+        request.append(newValue.getValue());
+        if (newValue.getField().isString()) {
+            request.append("'");
+        }
+        request.append("\n where \n").append(getWhereCondition(oldRow));
+        System.out.println(request.toString());
+        runSQLRequest(request.toString());
+    }
+
+    public String deleteRow(Table table, Row row) {
+        StringBuilder request = new StringBuilder("delete from \"" + table.getName() + "\" where\n");
+        request.append(getWhereCondition(row));
+        System.out.println(request);
+        try {
+            runSQLRequest(request.toString());
+        }
+        catch (SQLException ex) {
+            return returnError(ex.getMessage());
+        }
+        return "";
+    }
+
+    private String getWhereCondition(Row row) {
+        StringBuilder request = new StringBuilder();
+        boolean isFirst = true;
+        for (Value value : row.getValues()) {
+            if (value.getValue() == null) {
+                continue;
+            }
+            if (!isFirst) {
+                request.append(" and\n");
+            }
+            else {
+                isFirst = false;
+            }
+            request.append("\"").append(value.getField().getName()).append("\"")
+                    .append(" = ");
+            if (value.getField().isString()) {
+                request.append("'");
+            }
+            request.append(value.getValue());
+            if (value.getField().isString()) {
+                request.append("'");
+            }
+        }
+        return request.toString();
+    }
+
+    private String returnError(String error) {
+        if (error.length() > SecretProperties.MAX_ERROR_LENGTH) {
+            error = error.substring(0, SecretProperties.MAX_ERROR_LENGTH) + "...";
+        }
+        return error;
+    }
+
     public ResultSet getAllTableValues(Table table) throws SQLException {
-        System.out.println(table.getName());
         return runSQLRequest("select * from \"" + table.getName() + "\"");
     }
 }

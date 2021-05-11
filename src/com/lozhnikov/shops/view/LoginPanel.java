@@ -68,8 +68,12 @@ public class LoginPanel extends JPanel {
                 menuPanel.start();
             }
             catch (ClassNotFoundException | SQLException ex) {
+                String error = ex.getMessage();
+                if (error.length() > SecretProperties.MAX_ERROR_LENGTH) {
+                    error = error.substring(0, SecretProperties.MAX_ERROR_LENGTH) + "...";
+                }
                 infoLabel.setForeground(Color.RED);
-                infoLabel.setText(ex.getMessage());
+                infoLabel.setText(error);
             }
         });
 

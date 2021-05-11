@@ -57,13 +57,22 @@ public class MenuPanel extends JPanel {
             }
         });
         insertButton.addActionListener(e -> {
-            ChooseTablePanel chooseTablePanel = new ChooseTablePanel(mainFrame, this,
-                    sqlExecutor, ChooseGoalType.FILL);
-            chooseTablePanel.start();
+            infoLabel.setForeground(Color.BLACK);
+            infoLabel.setText("Запрос выполняется...");
+            mainFrame.revalidate();
+            update(getGraphics());
+            String error = sqlExecutor.insertValues();
+            if (error.isEmpty()) {
+                infoLabel.setText("Данные добавлены");
+            }
+            else {
+                infoLabel.setForeground(Color.RED);
+                infoLabel.setText(error);
+            }
         });
         viewButton.addActionListener(e -> {
             ChooseTablePanel chooseTablePanel = new ChooseTablePanel(mainFrame, this,
-                    sqlExecutor, ChooseGoalType.VIEW);
+                    sqlExecutor);
             chooseTablePanel.start();
         });
     }
@@ -81,6 +90,7 @@ public class MenuPanel extends JPanel {
         infoLabel.setForeground(Color.BLACK);
         infoLabel.setText("Запрос выполняется...");
         mainFrame.revalidate();
+        update(getGraphics());
         String error = "\n";
         try {
             error = function.call();

@@ -24,4 +24,13 @@ public class Table {
     public List<Field> getFields() {
         return fields;
     }
+
+    public Field findFieldByName(String name) {
+        for (Field field : fields) {
+            if (field.getTranslate().equals(name)) {
+                return field;
+            }
+        }
+        return null;
+    }
 }

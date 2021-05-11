@@ -12,14 +12,14 @@ import java.util.ArrayList;
 
 public class AddRowPanel extends JPanel {
     private final JFrame mainFrame;
-    private final ChooseTablePanel chooseTablePanel;
+    private final ViewTablePanel viewTablePanel;
     private final SQLExecutor sqlExecutor;
     private final Table table;
 
-    public AddRowPanel(JFrame mainFrame, ChooseTablePanel chooseTablePanel,
+    public AddRowPanel(JFrame mainFrame, ViewTablePanel viewTablePanel,
                        SQLExecutor sqlExecutor, Table table) {
         this.mainFrame = mainFrame;
-        this.chooseTablePanel = chooseTablePanel;
+        this.viewTablePanel = viewTablePanel;
         this.sqlExecutor = sqlExecutor;
         this.table = table;
     }
@@ -84,7 +84,7 @@ public class AddRowPanel extends JPanel {
         add(infoLabel, gbc);
 
         gbc.gridy++;
-        JButton closeButton = new JButton("Вернуться к выбору таблицы");
+        JButton closeButton = new JButton("Вернуться к таблице");
         add(closeButton, gbc);
         closeButton.addActionListener(e -> {
             close();
@@ -101,6 +101,6 @@ public class AddRowPanel extends JPanel {
     }
 
     private void close() {
-        chooseTablePanel.start();
+        viewTablePanel.start();
     }
 }

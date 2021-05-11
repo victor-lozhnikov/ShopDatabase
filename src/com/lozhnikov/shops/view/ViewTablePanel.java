@@ -1,8 +1,12 @@
 package com.lozhnikov.shops.view;
 
+import com.lozhnikov.shops.entities.Row;
 import com.lozhnikov.shops.entities.Table;
+import com.lozhnikov.shops.entities.Value;
+import com.lozhnikov.shops.sql.SQLExecutor;
 
 import javax.swing.*;
+import javax.swing.event.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.ResultSet;
@@ -14,34 +18,18 @@ public class ViewTablePanel extends JPanel {
     private final JFrame mainFrame;
     private final ChooseTablePanel chooseTablePanel;
     private final Table table;
-    private final ResultSet resultSet;
+    private final SQLExecutor sqlExecutor;
+    private ResultSet resultSet;
+    private JTable jTable;
+    private JScrollPane jScrollPane;
+    private JLabel infoLabel;
 
-    public ViewTablePanel(JFrame mainFrame, ChooseTablePanel chooseTablePanel, Table table, ResultSet resultSet) {
+    public ViewTablePanel(JFrame mainFrame, ChooseTablePanel chooseTablePanel,
+                          Table table, SQLExecutor sqlExecutor) {
         this.mainFrame = mainFrame;
         this.chooseTablePanel = chooseTablePanel;
         this.table = table;
-        this.resultSet = resultSet;
-    }
-
-    private DefaultTableModel buildTableModel() throws SQLException {
-        ResultSetMetaData metaData = resultSet.getMetaData();
-
-        Vector<String> columnNames = new Vector<>();
-        int columnCount = metaData.getColumnCount();
-        for (int i = 0; i < columnCount; ++i) {
-            columnNames.add(table.getFields().get(i).getTranslate());
-        }
-
-        Vector<Vector<Object>> data = new Vector<>();
-        while (resultSet.next()) {
-            Vector<Object> row = new Vector<>();
-            for (int i = 1; i <= columnCount; ++i) {
-                row.add(resultSet.getObject(i));
-            }
-            data.add(row);
-        }
-
-        return new DefaultTableModel(data, columnNames);
+        this.sqlExecutor = sqlExecutor;
     }
 
     private void init() {
@@ -55,16 +43,53 @@ public class ViewTablePanel extends JPanel {
         add(new JLabel(table.getTranslate()), gbc);
         gbc.gridy++;
 
-        try {
-            JTable table = new JTable(buildTableModel());
-            //table.setPreferredScrollableViewportSize(table.getPreferredSize());
-            table.setEnabled(false);
-            JScrollPane scrollPane = new JScrollPane(table);
-            add(scrollPane, gbc);
-        }
-        catch (SQLException ex) {
-            ex.printStackTrace();
-        }
+        jTable = new JTable();
+        jTable.setEnabled(false);
+        jScrollPane = new JScrollPane(jTable);
+        add(jScrollPane, gbc);
+
+        JPanel editButtons = new JPanel(new GridBagLayout());
+        GridBagConstraints gbcButtons = new GridBagConstraints();
+        gbcButtons.gridx = 0;
+        gbcButtons.gridy = 0;
+
+        JButton addRowButton = new JButton("Добавить новый ряд");
+        addRowButton.addActionListener(e -> {
+            AddRowPanel addRowPanel = new AddRowPanel(mainFrame, this, sqlExecutor, table);
+            addRowPanel.start();
+        });
+        editButtons.add(addRowButton, gbcButtons);
+
+        gbcButtons.gridx++;
+        JButton deleteRowButton = new JButton("Удалить выделенный ряд");
+        deleteRowButton.addActionListener(e -> {
+            if (jTable.getSelectedRow() == -1) {
+                updateInfoLabel("Ряд не выбран", true);
+            }
+            else {
+                Row row = new Row();
+                for (int i = 0; i < jTable.getColumnCount(); ++i) {
+                    row.add(new Value(table.findFieldByName(jTable.getColumnName(i)),
+                            jTable.getModel().getValueAt(jTable.getSelectedRow(), i)));
+                }
+                String error = sqlExecutor.deleteRow(table, row);
+                if (!error.isEmpty()) {
+                    updateInfoLabel(error, true);
+                }
+                else {
+                    updateInfoLabel("Ряд удален", false);
+                    ((CustomTableModel)jTable.getModel()).removeRow(jTable.getSelectedRow());
+                }
+            }
+        });
+        editButtons.add(deleteRowButton, gbcButtons);
+
+        gbc.gridy++;
+        add(editButtons, gbc);
+
+        gbc.gridy++;
+        infoLabel = new JLabel("\n");
+        add(infoLabel, gbc);
 
         gbc.gridy++;
         JButton closeButton = new JButton("Вернуться к выбору таблицы");
@@ -72,6 +97,36 @@ public class ViewTablePanel extends JPanel {
         closeButton.addActionListener(e -> {
             close();
         });
+
+        try {
+            infoLabel.setForeground(Color.BLACK);
+            infoLabel.setText("Получение данных таблицы...");
+            mainFrame.revalidate();
+            resultSet = sqlExecutor.getAllTableValues(table);
+            jTable = new JTable(new CustomTableModel(resultSet, table, sqlExecutor, this));
+            jTable.setAutoCreateRowSorter(true);
+            jScrollPane.getViewport().removeAll();
+            jScrollPane.getViewport().add(jTable);
+            infoLabel.setText("\n");
+        }
+        catch (SQLException ex) {
+            infoLabel.setForeground(Color.RED);
+            infoLabel.setText(ex.getMessage());
+        }
+    }
+
+    public void updateInfoLabel(String labelText, boolean isError) {
+        if (isError) {
+            infoLabel.setForeground(Color.RED);
+        }
+        else {
+            infoLabel.setForeground(Color.BLACK);
+        }
+        infoLabel.setText(labelText);
+        if (!isError) {
+            mainFrame.revalidate();
+            update(getGraphics());
+        }
     }
 
     public void start() {
