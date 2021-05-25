@@ -1,5 +1,6 @@
 package com.lozhnikov.shops.view;
 
+import com.lozhnikov.shops.SecretProperties;
 import com.lozhnikov.shops.sql.SQLExecutor;
 
 import javax.swing.*;
@@ -10,10 +11,12 @@ public class MenuPanel extends JPanel {
     private final JFrame mainFrame;
     private final SQLExecutor sqlExecutor;
     private JLabel infoLabel;
+    private LoginPanel loginPanel;
 
-    public MenuPanel(JFrame mainFrame, SQLExecutor sqlExecutor) {
+    public MenuPanel(JFrame mainFrame, SQLExecutor sqlExecutor, LoginPanel loginPanel) {
         this.mainFrame = mainFrame;
         this.sqlExecutor = sqlExecutor;
+        this.loginPanel = loginPanel;
     }
 
     private void init() {
@@ -25,19 +28,30 @@ public class MenuPanel extends JPanel {
         gbc.insets = new Insets(8, 8, 8, 8);
 
         JButton createButton = new JButton("Создать таблицы");
-        add(createButton, gbc);
+        if (sqlExecutor.getLogin().equals(SecretProperties.DB_ADMIN_LOGIN)) {
+            add(createButton, gbc);
+        }
 
         gbc.gridy++;
         JButton dropButton = new JButton("Удалить таблицы");
-        add(dropButton, gbc);
+        if (sqlExecutor.getLogin().equals(SecretProperties.DB_ADMIN_LOGIN)) {
+            add(dropButton, gbc);
+        }
 
         gbc.gridy++;
         JButton insertButton = new JButton("Заполнить таблицы");
-        add(insertButton, gbc);
+        if (sqlExecutor.getLogin().equals(SecretProperties.DB_ADMIN_LOGIN)) {
+            add(insertButton, gbc);
+        }
 
         gbc.gridy++;
         JButton viewButton = new JButton("Просмотреть таблицы");
         add(viewButton, gbc);
+
+
+        gbc.gridy++;
+        JButton exitButton = new JButton("Выход");
+        add(exitButton, gbc);
 
         gbc.gridy++;
         infoLabel = new JLabel("\n");
@@ -75,6 +89,9 @@ public class MenuPanel extends JPanel {
                     sqlExecutor);
             chooseTablePanel.start();
         });
+        exitButton.addActionListener(e -> {
+            close();
+        });
     }
 
     public void start() {
@@ -104,5 +121,10 @@ public class MenuPanel extends JPanel {
         infoLabel.setForeground(Color.RED);
         infoLabel.setText(error);
         return false;
+    }
+
+    private void close() {
+        sqlExecutor.close();
+        loginPanel.start();
     }
 }

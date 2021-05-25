@@ -1,5 +1,6 @@
 package com.lozhnikov.shops.view;
 
+import com.lozhnikov.shops.SecretProperties;
 import com.lozhnikov.shops.entities.Table;
 import com.lozhnikov.shops.sql.Model;
 import com.lozhnikov.shops.sql.SQLExecutor;
@@ -35,6 +36,14 @@ public class ChooseTablePanel extends JPanel {
         JLabel infoLabel = new JLabel("\n");
 
         for (Table table : Model.tables) {
+            if (sqlExecutor.getLogin().equals(SecretProperties.DB_BUYER_LOGIN) &&
+                    table.getAccess() > 0) {
+                continue;
+            }
+            if (sqlExecutor.getLogin().equals(SecretProperties.DB_MANAGER_LOGIN) &&
+                    table.getAccess() > 1) {
+                continue;
+            }
             JButton tableButton = new JButton(table.getTranslate());
             tables.add(tableButton, gbc);
 
@@ -44,7 +53,7 @@ public class ChooseTablePanel extends JPanel {
             });
 
             gbc.gridx++;
-            if (gbc.gridx == 3) {
+            if (gbc.gridx == 4) {
                 gbc.gridx = 0;
                 gbc.gridy++;
             }

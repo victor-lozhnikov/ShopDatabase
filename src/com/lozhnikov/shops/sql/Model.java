@@ -6,6 +6,14 @@ import com.lozhnikov.shops.entities.Table;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+access:
+0 - buyer can view
+1 - manager can edit
+2 - only for admin
+*/
+
+
 public class Model {
     public final static List<Table> tables = new ArrayList<Table>() {
         {
@@ -21,7 +29,8 @@ public class Model {
                             add(new Field("rent", "Арендная плата", true, false));
                             add(new Field("utility_bills", "Плата за коммунальные услуги", true, false));
                         }
-                    }
+                    },
+                    0
             ));
 
             add(new Table(
@@ -32,7 +41,8 @@ public class Model {
                             add(new Field("id", "ID", true, false));
                             add(new Field("name", "Название", true, true));
                         }
-                    }
+                    },
+                    0
             ));
 
             add(new Table(
@@ -45,7 +55,8 @@ public class Model {
                             add(new Field("name", "Название", true, true));
                             add(new Field("floor", "Этаж", false, false));
                         }
-                    }
+                    },
+                    2
             ));
 
             add(new Table(
@@ -60,7 +71,8 @@ public class Model {
                             add(new Field("section_id", "ID секции", false, false));
                             add(new Field("salary", "Зарплата", true, false));
                         }
-                    }
+                    },
+                    2
             ));
 
             add(new Table(
@@ -71,7 +83,8 @@ public class Model {
                             add(new Field("id", "ID", true, false));
                             add(new Field("name", "Название", true, true));
                         }
-                    }
+                    },
+                    2
             ));
 
             add(new Table(
@@ -82,7 +95,8 @@ public class Model {
                             add(new Field("id", "ID", true, false));
                             add(new Field("name", "Название", true, true));
                         }
-                    }
+                    },
+                    0
             ));
 
             add(new Table(
@@ -93,7 +107,8 @@ public class Model {
                             add(new Field("id", "ID", true, false));
                             add(new Field("full_name", "ФИ", true, true));
                         }
-                    }
+                    },
+                    2
             ));
 
             add(new Table(
@@ -102,14 +117,15 @@ public class Model {
                     new ArrayList<Field>() {
                         {
                             add(new Field("id", "ID", true, false));
-                            add(new Field("full_name", "Название", true, true));
+                            add(new Field("name", "Название", true, true));
                         }
-                    }
+                    },
+                    2
             ));
 
             add(new Table(
-                    "availability",
-                    "Наличие товаров",
+                    "availability_in_stores",
+                    "Наличие товаров в магазинах",
                     new ArrayList<Field>() {
                         {
                             add(new Field("store_id", "ID магазина", true, false));
@@ -117,7 +133,8 @@ public class Model {
                             add(new Field("count", "Количество", true, false));
                             add(new Field("price", "Цена", true, false));
                         }
-                    }
+                    },
+                    0
             ));
 
             add(new Table(
@@ -130,7 +147,8 @@ public class Model {
                             add(new Field("provider_id", "ID поставщика", true, false));
                             add(new Field("date", "Дата", true, false));
                         }
-                    }
+                    },
+                    2
             ));
 
             add(new Table(
@@ -143,7 +161,8 @@ public class Model {
                             add(new Field("buyer_id", "ID покупателя", false, false));
                             add(new Field("date", "Дата", true, false));
                         }
-                    }
+                    },
+                    2
             ));
 
             add(new Table(
@@ -155,7 +174,22 @@ public class Model {
                             add(new Field("store_id", "ID магазина", true, false));
                             add(new Field("date", "Дата", true, false));
                         }
-                    }
+                    },
+                    1
+            ));
+
+            add(new Table(
+                    "availability_in_providers",
+                    "Наличие товаров у поставщиков",
+                    new ArrayList<Field>() {
+                        {
+                            add(new Field("provider_id", "ID поставщика", true, false));
+                            add(new Field("product_id", "ID продукта", true, false));
+                            add(new Field("count", "Количество", true, false));
+                            add(new Field("price", "Цена", true, false));
+                        }
+                    },
+                    2
             ));
 
             add(new Table(
@@ -168,7 +202,8 @@ public class Model {
                             add(new Field("count", "Количество", true, false));
                             add(new Field("price", "Цена", true, false));
                         }
-                    }
+                    },
+                    2
             ));
 
             add(new Table(
@@ -181,11 +216,12 @@ public class Model {
                             add(new Field("count", "Количество", true, false));
                             add(new Field("price", "Цена", true, false));
                         }
-                    }
+                    },
+                    2
             ));
 
             add(new Table(
-                    "products_in_requests",
+                    "products_in_request",
                     "Продукты в заявках",
                     new ArrayList<Field>() {
                         {
@@ -193,7 +229,8 @@ public class Model {
                             add(new Field("product_id", "ID продукта", true, false));
                             add(new Field("count", "Количество", true, false));
                         }
-                    }
+                    },
+                    1
             ));
         }
     };

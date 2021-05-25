@@ -49,8 +49,23 @@ public class LoginPanel extends JPanel {
         JButton loginButton = new JButton("Войти");
         add(loginButton, gbc);
         gbc.gridy++;
-        JButton defaultLoginButton = new JButton("Использовать данные по умолчанию");
-        add(defaultLoginButton, gbc);
+        add(new JLabel("Выбрать роль:"), gbc);
+
+        JPanel defaultButtons = new JPanel(new GridBagLayout());
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        JButton adminButton = new JButton("Администратор");
+        defaultButtons.add(adminButton, gbc);
+        gbc.gridx++;
+        JButton managerButton = new JButton("Менеджер");
+        defaultButtons.add(managerButton, gbc);
+        gbc.gridx++;
+        JButton buyerButton = new JButton("Покупатель");
+        defaultButtons.add(buyerButton, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        add(defaultButtons, gbc);
 
         gbc.gridy++;
         JLabel infoLabel = new JLabel("\n");
@@ -64,7 +79,7 @@ public class LoginPanel extends JPanel {
             try {
                 SQLExecutor sqlExecutor = new SQLExecutor(
                         urlField.getText(), loginField.getText(), passwordField.getText());
-                MenuPanel menuPanel = new MenuPanel(mainFrame, sqlExecutor);
+                MenuPanel menuPanel = new MenuPanel(mainFrame, sqlExecutor, this);
                 menuPanel.start();
             }
             catch (ClassNotFoundException | SQLException ex) {
@@ -77,10 +92,22 @@ public class LoginPanel extends JPanel {
             }
         });
 
-        defaultLoginButton.addActionListener(e -> {
+        adminButton.addActionListener(e -> {
             urlField.setText(SecretProperties.DB_URL);
-            loginField.setText(SecretProperties.DB_USER_LOGIN);
-            passwordField.setText(SecretProperties.DB_USER_PASSWORD);
+            loginField.setText(SecretProperties.DB_ADMIN_LOGIN);
+            passwordField.setText(SecretProperties.DB_ADMIN_PASSWORD);
+        });
+
+        managerButton.addActionListener(e -> {
+            urlField.setText(SecretProperties.DB_URL);
+            loginField.setText(SecretProperties.DB_MANAGER_LOGIN);
+            passwordField.setText(SecretProperties.DB_MANAGER_PASSWORD);
+        });
+
+        buyerButton.addActionListener(e -> {
+            urlField.setText(SecretProperties.DB_URL);
+            loginField.setText(SecretProperties.DB_BUYER_LOGIN);
+            passwordField.setText(SecretProperties.DB_BUYER_PASSWORD);
         });
     }
 

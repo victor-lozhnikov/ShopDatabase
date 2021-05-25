@@ -38,6 +38,9 @@ public class AddRowPanel extends JPanel {
         java.util.List<JTextField> textFields = new ArrayList<>();
 
         for (Field field : table.getFields()) {
+            if (field.getName().equals("id")) {
+                continue;
+            }
             gbc.gridx = 0;
             fieldsPanel.add(new JLabel(field.getTranslate() + (field.isNotNull() ? "*" : "")), gbc);
             gbc.gridx++;
@@ -63,8 +66,12 @@ public class AddRowPanel extends JPanel {
             Row row = new Row();
             int i = 0;
             for (Field field : table.getFields()) {
+                if (field.getName().equals("id")) {
+                    continue;
+                }
                 String fieldText = textFields.get(i).getText();
                 if (fieldText.isEmpty()) {
+                    i++;
                     continue;
                 }
                 row.add(new Value(field, fieldText));

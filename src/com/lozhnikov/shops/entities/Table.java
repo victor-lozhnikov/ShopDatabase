@@ -6,11 +6,13 @@ public class Table {
     private final String name;
     private final String translate;
     private final List<Field> fields;
+    private final int access;
 
-    public Table(String name, String translate, List<Field> fields) {
+    public Table(String name, String translate, List<Field> fields, int access) {
         this.name = name;
         this.translate = translate;
         this.fields = fields;
+        this.access = access;
     }
 
     public String getName() {
@@ -32,5 +34,9 @@ public class Table {
             }
         }
         return null;
+    }
+
+    public int getAccess() {
+        return access;
     }
 }

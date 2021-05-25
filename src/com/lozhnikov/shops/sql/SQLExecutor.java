@@ -20,9 +20,13 @@ import java.util.stream.Stream;
 
 public class SQLExecutor {
     private final Connection connection;
+    private final String schema = "shop_admin.";
+    private final String login;
 
     public SQLExecutor(String url, String login, String password) throws ClassNotFoundException, SQLException {
         Class.forName("oracle.jdbc.driver.OracleDriver");
+
+        this.login = login;
 
         Properties props = new Properties();
         props.setProperty("user", login);
@@ -37,9 +41,11 @@ public class SQLExecutor {
         System.out.println("SQL connected!");
     }
 
-    public ResultSet runSQLRequest(String request) throws SQLException {
-        PreparedStatement preStatement = connection.prepareStatement(request);
-        return preStatement.executeQuery();
+    public ResultSet runSQLRequest(String request, boolean close) throws SQLException {
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery(request);
+        if (close) statement.close();
+        return resultSet;
     }
 
     private String runSQLScript(String fileName) {
@@ -48,9 +54,15 @@ public class SQLExecutor {
                 new InputStreamReader(getClass().getResourceAsStream(fileName)))
                 .lines().collect(Collectors.joining());
         String[] requests = fileContent.split(";");
-        for (String request : requests) {
+        for (int i = 0; i < requests.length; ++i) {
+            StringBuilder request = new StringBuilder(requests[i]);
+            if (i != requests.length - 1 && requests[i + 1].equals("END")) {
+                request.append("; ").append(requests[i + 1]).append(";");
+                i++;
+            }
             try {
-                runSQLRequest(request);
+                System.out.println(request.toString());
+                runSQLRequest(request.toString(), true);
             }
             catch (SQLException ex) {
                 toReturn = returnError(ex.getMessage());
@@ -73,7 +85,8 @@ public class SQLExecutor {
     }
 
     public String insertValue(Table table, Row row) {
-        StringBuilder request = new StringBuilder("insert into \"" + table.getName() + "\"\n");
+        StringBuilder request = new StringBuilder("insert into " +
+                schema + "\"" + table.getName() + "\"\n");
         request.append("(");
         boolean isFirst = true;
         for (Value value : row.getValues()) {
@@ -105,7 +118,8 @@ public class SQLExecutor {
         request.append(")");
 
         try {
-            runSQLRequest(request.toString());
+            System.out.println(request.toString());
+            runSQLRequest(request.toString(), true);
         }
         catch (SQLException ex) {
             return returnError(ex.getMessage());
@@ -114,7 +128,8 @@ public class SQLExecutor {
     }
 
     public void updateValue(Table table, Value newValue, Row oldRow) throws SQLException {
-        StringBuilder request = new StringBuilder("update \"" + table.getName() + "\"\nset ");
+        StringBuilder request = new StringBuilder("update " +
+                schema + "\"" + table.getName() + "\"\nset ");
         request.append("\"").append(newValue.getField().getName()).append("\" = ");
         if (newValue.getField().isString()) {
             request.append("'");
@@ -125,15 +140,16 @@ public class SQLExecutor {
         }
         request.append("\n where \n").append(getWhereCondition(oldRow));
         System.out.println(request.toString());
-        runSQLRequest(request.toString());
+        runSQLRequest(request.toString(), true);
     }
 
     public String deleteRow(Table table, Row row) {
-        StringBuilder request = new StringBuilder("delete from \"" + table.getName() + "\" where\n");
+        StringBuilder request = new StringBuilder("delete from " +
+                schema + "\"" + table.getName() + "\" where\n");
         request.append(getWhereCondition(row));
         System.out.println(request);
         try {
-            runSQLRequest(request.toString());
+            runSQLRequest(request.toString(), true);
         }
         catch (SQLException ex) {
             return returnError(ex.getMessage());
@@ -175,6 +191,19 @@ public class SQLExecutor {
     }
 
     public ResultSet getAllTableValues(Table table) throws SQLException {
-        return runSQLRequest("select * from \"" + table.getName() + "\"");
+        return runSQLRequest("select * from " + schema + "\"" + table.getName() + "\"", false);
+    }
+
+    public void close() {
+        try {
+            connection.close();
+        }
+        catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public String getLogin() {
+        return login;
     }
 }

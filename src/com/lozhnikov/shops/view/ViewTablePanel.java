@@ -1,5 +1,6 @@
 package com.lozhnikov.shops.view;
 
+import com.lozhnikov.shops.SecretProperties;
 import com.lozhnikov.shops.entities.Row;
 import com.lozhnikov.shops.entities.Table;
 import com.lozhnikov.shops.entities.Value;
@@ -58,7 +59,13 @@ public class ViewTablePanel extends JPanel {
             AddRowPanel addRowPanel = new AddRowPanel(mainFrame, this, sqlExecutor, table);
             addRowPanel.start();
         });
-        editButtons.add(addRowButton, gbcButtons);
+
+        if (sqlExecutor.getLogin().equals(SecretProperties.DB_ADMIN_LOGIN) ||
+                sqlExecutor.getLogin().equals(SecretProperties.DB_MANAGER_LOGIN) &&
+                    table.getAccess() == 1) {
+            editButtons.add(addRowButton, gbcButtons);
+        }
+
 
         gbcButtons.gridx++;
         JButton deleteRowButton = new JButton("Удалить выделенный ряд");
@@ -82,7 +89,12 @@ public class ViewTablePanel extends JPanel {
                 }
             }
         });
-        editButtons.add(deleteRowButton, gbcButtons);
+        if (sqlExecutor.getLogin().equals(SecretProperties.DB_ADMIN_LOGIN) ||
+                sqlExecutor.getLogin().equals(SecretProperties.DB_MANAGER_LOGIN) &&
+                        table.getAccess() == 1) {
+            editButtons.add(deleteRowButton, gbcButtons);
+        }
+
 
         gbc.gridy++;
         add(editButtons, gbc);
@@ -104,6 +116,11 @@ public class ViewTablePanel extends JPanel {
             mainFrame.revalidate();
             resultSet = sqlExecutor.getAllTableValues(table);
             jTable = new JTable(new CustomTableModel(resultSet, table, sqlExecutor, this));
+            if (sqlExecutor.getLogin().equals(SecretProperties.DB_BUYER_LOGIN) ||
+                    sqlExecutor.getLogin().equals(SecretProperties.DB_MANAGER_LOGIN) &&
+                            table.getAccess() != 1) {
+                jTable.setEnabled(false);
+            }
             jTable.setAutoCreateRowSorter(true);
             jScrollPane.getViewport().removeAll();
             jScrollPane.getViewport().add(jTable);

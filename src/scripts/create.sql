@@ -1,4 +1,4 @@
-CREATE TABLE "availability" (
+CREATE TABLE "availability_in_stores" (
     "store_id" NUMBER(11) NOT NULL,
     "product_id" NUMBER(11) NOT NULL,
     "count" NUMBER(11) NOT NULL,
@@ -110,8 +110,16 @@ CREATE TABLE "products_in_request" (
     PRIMARY KEY ("request_id", "product_id")
 );
 
-ALTER TABLE "availability" ADD CONSTRAINT "fk_availability_products" FOREIGN KEY ("product_id") REFERENCES "products" ("id");
-ALTER TABLE "availability" ADD CONSTRAINT "fk_availability_stores" FOREIGN KEY ("store_id") REFERENCES "stores" ("id");
+CREATE TABLE "availability_in_providers" (
+    "provider_id" NUMBER(11) NOT NULL,
+    "product_id" NUMBER(11) NOT NULL,
+    "count" NUMBER(11) NOT NULL,
+    "price" NUMBER(11,2) NOT NULL,
+    PRIMARY KEY ("provider_id", "product_id")
+);
+
+ALTER TABLE "availability_in_stores" ADD CONSTRAINT "fk_availability_products" FOREIGN KEY ("product_id") REFERENCES "products" ("id");
+ALTER TABLE "availability_in_stores" ADD CONSTRAINT "fk_availability_stores" FOREIGN KEY ("store_id") REFERENCES "stores" ("id");
 ALTER TABLE "deliveries" ADD CONSTRAINT "fk_delivery_provider" FOREIGN KEY ("provider_id") REFERENCES "providers" ("id");
 ALTER TABLE "deliveries" ADD CONSTRAINT "fk_delivery_store" FOREIGN KEY ("store_id") REFERENCES "stores" ("id");
 ALTER TABLE "requests" ADD CONSTRAINT "fk_request_store" FOREIGN KEY ("store_id") REFERENCES "stores" ("id");
@@ -128,3 +136,75 @@ ALTER TABLE "purchases" ADD CONSTRAINT "fk_purchase_store" FOREIGN KEY ("store_i
 ALTER TABLE "purchases" ADD CONSTRAINT "fk_purchase_buyer" FOREIGN KEY ("buyer_id") REFERENCES "buyers" ("id");
 ALTER TABLE "sections" ADD CONSTRAINT "fk_section_store" FOREIGN KEY ("store_id") REFERENCES "stores" ("id");
 ALTER TABLE "stores" ADD CONSTRAINT "fk_store_type" FOREIGN KEY ("type_id") REFERENCES "store_types" ("id");
+ALTER TABLE "availability_in_providers" ADD CONSTRAINT "fk_availability1_products" FOREIGN KEY ("product_id") REFERENCES "products" ("id");
+ALTER TABLE "availability_in_providers" ADD CONSTRAINT "fk_availability1_providers" FOREIGN KEY ("provider_id") REFERENCES "providers" ("id");
+
+GRANT
+    SELECT
+    ON
+        "availability_in_stores"
+    TO
+    shop_buyer;
+
+GRANT
+    SELECT
+    ON
+        "stores"
+    TO
+    shop_buyer;
+
+GRANT
+    SELECT
+    ON
+        "store_types"
+    TO
+    shop_buyer;
+
+GRANT
+    SELECT
+    ON
+        "products"
+    TO
+    shop_buyer;
+
+GRANT
+    ALL
+    ON
+        "requests"
+    TO
+    shop_manager;
+
+GRANT
+    ALL
+    ON
+        "products_in_request"
+    TO
+    shop_manager;
+
+GRANT
+    SELECT
+    ON
+        "stores"
+    TO
+    shop_manager;
+
+GRANT
+    SELECT
+    ON
+        "store_types"
+    TO
+    shop_manager;
+
+GRANT
+    SELECT
+    ON
+        "products"
+    TO
+    shop_manager;
+
+GRANT
+    SELECT
+    ON
+        "availability_in_stores"
+    TO
+    shop_manager;
