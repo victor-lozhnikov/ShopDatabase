@@ -33,21 +33,26 @@ public class MenuPanel extends JPanel {
         }
 
         gbc.gridy++;
-        JButton dropButton = new JButton("Удалить таблицы");
-        if (sqlExecutor.getLogin().equals(SecretProperties.DB_ADMIN_LOGIN)) {
-            add(dropButton, gbc);
-        }
-
-        gbc.gridy++;
         JButton insertButton = new JButton("Заполнить таблицы");
         if (sqlExecutor.getLogin().equals(SecretProperties.DB_ADMIN_LOGIN)) {
             add(insertButton, gbc);
         }
 
         gbc.gridy++;
+        JButton dropButton = new JButton("Удалить таблицы");
+        if (sqlExecutor.getLogin().equals(SecretProperties.DB_ADMIN_LOGIN)) {
+            add(dropButton, gbc);
+        }
+
+        gbc.gridy++;
         JButton viewButton = new JButton("Просмотреть таблицы");
         add(viewButton, gbc);
 
+        gbc.gridy++;
+        JButton transactionButton = new JButton("Выполнить транзакцию");
+        if (sqlExecutor.getLogin().equals(SecretProperties.DB_ADMIN_LOGIN)) {
+            add(transactionButton, gbc);
+        }
 
         gbc.gridy++;
         JButton exitButton = new JButton("Выход");
@@ -88,6 +93,11 @@ public class MenuPanel extends JPanel {
             ChooseTablePanel chooseTablePanel = new ChooseTablePanel(mainFrame, this,
                     sqlExecutor);
             chooseTablePanel.start();
+        });
+        transactionButton.addActionListener(e -> {
+            TransactionPanel transactionPanel = new TransactionPanel(mainFrame, sqlExecutor,
+                    this);
+            transactionPanel.start();
         });
         exitButton.addActionListener(e -> {
             close();

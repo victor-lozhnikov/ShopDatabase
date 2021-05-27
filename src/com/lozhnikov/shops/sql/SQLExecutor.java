@@ -9,6 +9,7 @@ import com.lozhnikov.shops.entities.Value;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
@@ -61,7 +62,7 @@ public class SQLExecutor {
                 i++;
             }
             try {
-                System.out.println(request.toString());
+                //System.out.println(request.toString());
                 runSQLRequest(request.toString(), true);
             }
             catch (SQLException ex) {
@@ -201,6 +202,74 @@ public class SQLExecutor {
         catch (SQLException ex) {
             ex.printStackTrace();
         }
+    }
+
+    public String runTransaction(int requestId, int providerId, double coefficient) {
+        try {
+            connection.setAutoCommit(false);
+
+            ResultSet requestSet = runSQLRequest("select * from " + schema +
+                    "\"requests\" where \"id\" = " + requestId, false);
+
+            requestSet.next();
+            int storeId = ((BigDecimal) requestSet.getObject(2)).intValue();
+
+            ResultSet productsSet = runSQLRequest("select * from " + schema +
+                    "\"products_in_request\" where \"request_id\" = " + requestId, false);
+
+            while (productsSet.next()) {
+                int productId = ((BigDecimal) productsSet.getObject(2)).intValue();
+                int countNeed = ((BigDecimal) productsSet.getObject(3)).intValue();
+
+                ResultSet availabilityProv = runSQLRequest("select * from " + schema +
+                        "\"availability_in_providers\" where \"provider_id\" = " + providerId +
+                        " and \"product_id\" = " + productId, false);
+                availabilityProv.next();
+                int countAvailableProv = ((BigDecimal) availabilityProv.getObject(3)).intValue();
+                double price = ((BigDecimal) availabilityProv.getObject(4)).doubleValue();
+
+                runSQLRequest("update " + schema + "\"availability_in_providers\" set " +
+                        "\"count\" = " + (countAvailableProv - countNeed) + " where " +
+                        "\"provider_id\" = " + providerId +
+                        " and \"product_id\" = " + productId, true);
+
+                ResultSet availabilityStore = runSQLRequest("select * from " + schema +
+                        "\"availability_in_stores\" where \"store_id\" = " + storeId +
+                        " and \"product_id\" = " + productId, false);
+
+                if (!availabilityStore.next()) {
+                    runSQLRequest("insert into " + schema +
+                            "\"availability_in_stores\" values (" + storeId + ", " +
+                            productId + ", " + countNeed + ", " + (price * coefficient) + ")", true);
+                }
+                else {
+                    int countAvailableStore = ((BigDecimal) availabilityStore.getObject(3)).intValue();
+                    runSQLRequest("update " + schema + "\"availability_in_stores\" set " +
+                            "\"count\" = " + (countAvailableStore + countNeed) +
+                            ", \"price\" = " + (price * coefficient) + " where " +
+                            "\"store_id\" = " + storeId +
+                            " and \"product_id\" = " + productId, true);
+                }
+            }
+
+            runSQLRequest("delete from " + schema + "\"products_in_request\" where " +
+                            "\"request_id\" = " + requestId, true);
+            runSQLRequest("delete from " + schema + "\"requests\" where " +
+                    "\"id\" = " + requestId, true);
+
+            connection.commit();
+            connection.setAutoCommit(true);
+        }
+        catch (SQLException ex) {
+            try {
+                connection.rollback();
+            }
+            catch (SQLException ex1) {
+                ex.printStackTrace();
+            }
+            return ex.getMessage();
+        }
+        return "";
     }
 
     public String getLogin() {

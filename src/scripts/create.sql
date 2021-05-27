@@ -3,6 +3,8 @@ CREATE TABLE "availability_in_stores" (
     "product_id" NUMBER(11) NOT NULL,
     "count" NUMBER(11) NOT NULL,
     "price" NUMBER(11,2) NOT NULL,
+    CONSTRAINT check_av1_count CHECK ("count" >= 0),
+    CONSTRAINT check_av1_price CHECK ("price" > 0),
     PRIMARY KEY ("store_id", "product_id")
 );
 
@@ -27,6 +29,7 @@ CREATE TABLE "employees" (
     "store_id" NUMBER(11) NOT NULL,
     "section_id" NUMBER(11),
     "salary" NUMBER(11,2) NOT NULL,
+    CONSTRAINT check_emp_salary CHECK ("salary" > 0),
     PRIMARY KEY ("id")
 );
 
@@ -47,6 +50,8 @@ CREATE TABLE "products_in_delivery" (
     "product_id" NUMBER(11) NOT NULL,
     "count" NUMBER(11) NOT NULL,
     "price" NUMBER(11,2) NOT NULL,
+    CONSTRAINT check_del_count CHECK ("count" >= 0),
+    CONSTRAINT check_del_price CHECK ("price" > 0),
     PRIMARY KEY ("delivery_id", "product_id")
 );
 
@@ -55,6 +60,8 @@ CREATE TABLE "products_in_purchase" (
     "product_id" NUMBER(11) NOT NULL,
     "count" NUMBER(11) NOT NULL,
     "price" NUMBER(11,2) NOT NULL,
+    CONSTRAINT check_pur_count CHECK ("count" >= 0),
+    CONSTRAINT check_pur_price CHECK ("price" > 0),
     PRIMARY KEY ("purchase_id", "product_id")
 );
 
@@ -93,6 +100,9 @@ CREATE TABLE "stores" (
     "area" NUMBER(11,2) NOT NULL,
     "rent" NUMBER(11,2) NOT NULL,
     "utility_bills" NUMBER(11,2) NOT NULL,
+    CONSTRAINT check_area CHECK ("area" > 0),
+    CONSTRAINT check_rent CHECK ("rent" > 0),
+    CONSTRAINT check_bills CHECK ("utility_bills" > 0),
     PRIMARY KEY ("id")
 );
 
@@ -107,6 +117,7 @@ CREATE TABLE "products_in_request" (
     "request_id" NUMBER(11) NOT NULL,
     "product_id" NUMBER(11) NOT NULL,
     "count" NUMBER(11) NOT NULL,
+    CONSTRAINT check_req_count CHECK ("count" > 0),
     PRIMARY KEY ("request_id", "product_id")
 );
 
@@ -115,6 +126,8 @@ CREATE TABLE "availability_in_providers" (
     "product_id" NUMBER(11) NOT NULL,
     "count" NUMBER(11) NOT NULL,
     "price" NUMBER(11,2) NOT NULL,
+    CONSTRAINT check_av2_count CHECK ("count" >= 0),
+    CONSTRAINT check_av2_price CHECK ("price" > 0),
     PRIMARY KEY ("provider_id", "product_id")
 );
 
